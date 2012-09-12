@@ -51,6 +51,11 @@ class TweetsStore
     new_tweets.map! { |item| item.to_hash }
     self.tweets = self.tweets + new_tweets
   end
+
+  def prepend_tweets(new_tweets)
+    new_tweets.map! { |item| item.to_hash }
+    self.tweets = new_tweets + self.tweets
+  end
   
   def save
     # Create directory if it doesn't exist
@@ -79,7 +84,7 @@ class TwitterDownloader
     self.username = username
   end
   
-  def download_tweets_earlier_than(max_tweet_id)
+  def download_tweets_earlier_than(tweet_id)
     options = { 
       :count => 200, 
       :trim_user => false, 
@@ -88,8 +93,23 @@ class TwitterDownloader
       :include_entities => true,
       :contributor_details => true
     }
-    if max_tweet_id
-      options[:max_id] = max_tweet_id.to_i
+    if tweet_id
+      options[:max_id] = tweet_id.to_i
+    end
+    tweets = Twitter.user_timeline(self.username, options)
+  end
+
+  def download_tweets_later_than(tweet_id)
+    options = { 
+      :count => 200, 
+      :trim_user => false, 
+      :exclude_replies => false, 
+      :include_rts => true, 
+      :include_entities => true,
+      :contributor_details => true
+    }
+    if tweet_id
+      options[:since_id] = tweet_id.to_i
     end
     tweets = Twitter.user_timeline(self.username, options)
   end
@@ -112,15 +132,16 @@ end
 twitter_username = ARGV[0]
 path_to_json_file = File.dirname(File.expand_path(__FILE__)) + "/data/#{twitter_username}.json"
 tweetsStore = TweetsStore.new(path_to_json_file)
+downloader = TwitterDownloader.new(twitter_username)
 
 earliest_tweet_id = tweetsStore.lowest_tweet_id
-if (earliest_tweet_id.nil?)
+if earliest_tweet_id.nil?
   puts "No tweets stored so far. Trying to download all your tweets."
 else
   puts "Trying to download tweets older than id: #{ earliest_tweet_id }."
 end
 
-total_tweets_downloaded = 0
+past_tweets_downloaded = 0
 begin
   max_tweet_id = nil
   earliest_tweet_id = tweetsStore.lowest_tweet_id
@@ -128,18 +149,37 @@ begin
     max_tweet_id = earliest_tweet_id.to_i - 1
   end
 
-  downloader = TwitterDownloader.new(twitter_username)
   tweets = downloader.download_tweets_earlier_than(max_tweet_id)
-  new_tweets_downloaded = tweets.count
+  tweets_downloaded = tweets.count
   if tweets.empty?
     puts "Downloaded no more tweets."
   else
-    total_tweets_downloaded = total_tweets_downloaded + new_tweets_downloaded
-    puts "Downloaded #{ new_tweets_downloaded } tweets from #{ tweets.first['id'] } to #{ tweets.last['id'] }."
+    past_tweets_downloaded = past_tweets_downloaded + tweets_downloaded
+    puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id'] } to #{ tweets.last['id'] }."
   end
   tweetsStore.append_tweets(tweets)
-end while new_tweets_downloaded > 0
-puts "Total tweets downloaded: #{ total_tweets_downloaded }"
+end while tweets_downloaded > 0
+puts "Past tweets downloaded: #{ past_tweets_downloaded }"
+
+most_recent_tweet_id = tweetsStore.highest_tweet_id
+if !most_recent_tweet_id.nil?
+  puts "Trying to download tweets later than id: #{ most_recent_tweet_id }"
+
+  recent_tweets_downloaded = 0
+  begin
+    since_tweet_id = tweetsStore.highest_tweet_id
+    tweets = downloader.download_tweets_later_than(since_tweet_id)
+    tweets_downloaded = tweets.count
+    if tweets.empty?
+      puts "Downloaded no more tweets."
+    else
+      recent_tweets_downloaded = recent_tweets_downloaded + tweets_downloaded
+      puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id'] } to #{ tweets.last['id'] }."
+    end
+    tweetsStore.prepend_tweets(tweets)
+  end while tweets_downloaded > 0
+  puts "New tweets downloaded: #{ recent_tweets_downloaded }"
+end
 
 tweetsStore.save
 puts "Total tweets stored: #{ tweetsStore.tweets.count }"

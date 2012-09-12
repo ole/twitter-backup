@@ -9,22 +9,17 @@ class TwitterDownloader
   end
   
   def download_tweets_earlier_than(tweet_id)
-    options = { 
-      :count => 200, 
-      :trim_user => false, 
-      :exclude_replies => false, 
-      :include_rts => true, 
-      :include_entities => true,
-      :contributor_details => true
-    }
-    if tweet_id
-      options[:max_id] = tweet_id.to_i
-    end
-    tweets = Twitter.user_timeline(self.username, options)
+    options = tweet_id ? { :max_id => tweet_id.to_i } : {}
+    download_tweets(options)
   end
 
   def download_tweets_later_than(tweet_id)
-    options = { 
+    options = tweet_id ? { :since_id => tweet_id.to_i } : {}
+    download_tweets(options)
+  end
+
+  def download_tweets(options = {})
+    default_options = { 
       :count => 200, 
       :trim_user => false, 
       :exclude_replies => false, 
@@ -32,9 +27,7 @@ class TwitterDownloader
       :include_entities => true,
       :contributor_details => true
     }
-    if tweet_id
-      options[:since_id] = tweet_id.to_i
-    end
+    all_options = default_options.merge(options)
     tweets = Twitter.user_timeline(self.username, options)
   end
 end

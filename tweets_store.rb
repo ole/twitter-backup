@@ -2,8 +2,8 @@ require 'json'
 require 'fileutils'
 
 class TweetsStore
-  attr_accessor :path_to_json_file
   attr_accessor :tweets
+  attr_accessor :path_to_json_file
 
   def initialize(path_to_json_file)
     if path_to_json_file.nil? || path_to_json_file.empty?
@@ -13,17 +13,10 @@ class TweetsStore
     self.tweets = parse_json_file || []
   end
   
-  def parse_json_file
-    if (File.exists?(self.path_to_json_file))
-      File.open(self.path_to_json_file, mode: 'r:UTF-8', cr_newline: true) do |file|
-        json_string = file.read(nil)
-        JSON.parse(json_string)
-      end
-    else
-      nil
-    end
+  def count
+    return self.tweets.count
   end
-
+  
   def lowest_tweet_id
     earliest_tweet = self.tweets.last
     if !earliest_tweet.nil?
@@ -53,13 +46,31 @@ class TweetsStore
   end
   
   def save
-    # Create directory if it doesn't exist
+    create_data_dir_if_necessary
+    write_tweets_to_data_file
+  end
+  
+  private
+  
+  def parse_json_file
+    if (File.exists?(self.path_to_json_file))
+      File.open(self.path_to_json_file, mode: 'r:UTF-8', cr_newline: true) do |file|
+        json_string = file.read(nil)
+        JSON.parse(json_string)
+      end
+    else
+      nil
+    end
+  end
+  
+  def create_data_dir_if_necessary
     dirname = File.dirname(self.path_to_json_file)
     if !Dir.exists?(dirname)
       FileUtils.mkpath(dirname)
     end
-    
-    # Write tweets data to file
+  end
+  
+  def write_tweets_to_data_file
     File.open(self.path_to_json_file, mode: 'w:UTF-8', cr_newline: true) do |file| 
       json_string = JSON.pretty_generate(self.tweets)
       file.write(json_string)

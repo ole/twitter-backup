@@ -69,4 +69,4 @@ if !most_recent_tweet_id.nil?
 end
 
 tweetsStore.save
-puts "Total tweets stored: #{ tweetsStore.tweets.count }"
+puts "Total tweets stored: #{ tweetsStore.count }"

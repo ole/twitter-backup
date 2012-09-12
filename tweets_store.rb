@@ -10,7 +10,7 @@ class TweetsStore
       raise RuntimeError, "path_to_json_file must not be blank."
     end
     self.path_to_json_file = path_to_json_file
-    self.tweets = parse_json_file
+    self.tweets = parse_json_file || []
   end
   
   def parse_json_file
@@ -20,8 +20,7 @@ class TweetsStore
         JSON.parse(json_string)
       end
     else
-      # Empty array
-      JSON.parse "[]"
+      nil
     end
   end
 

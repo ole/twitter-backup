@@ -163,7 +163,7 @@ puts "Past tweets downloaded: #{ past_tweets_downloaded }"
 
 most_recent_tweet_id = tweetsStore.highest_tweet_id
 if !most_recent_tweet_id.nil?
-  puts "Trying to download tweets later than id: #{ most_recent_tweet_id }"
+  puts "Trying to download tweets newer than id: #{ most_recent_tweet_id }"
 
   recent_tweets_downloaded = 0
   begin

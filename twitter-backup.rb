@@ -100,7 +100,7 @@ require 'optparse'
 
 options = {}
 option_parser = OptionParser.new do |opts|
-  opts.banner = "Usage: twitter-backup.rb <username>"
+  opts.banner = "Usage: #{opts.program_name} <username>"
 end
 option_parser.parse!
 

@@ -1,8 +1,8 @@
-require 'twitter'
-
-Twitter.configure do |config|
-  config.consumer_key = 'YOUR_CONSUMER_KEY'
-  config.consumer_secret = 'YOUR_CONSUMER_SECRET'
-  config.oauth_token = 'YOUR_OAUTH_TOKEN'
-  config.oauth_token_secret = 'YOUR_OAUTH_TOKEN_SECRET'
+module TwitterBackup
+  module Config
+    CONSUMER_KEY = 'CONSUMER_KEY'
+    CONSUMER_SECRET = 'CONSUMER_SECRET'
+    OAUTH_TOKEN = 'OAUTH_TOKEN'
+    OAUTH_TOKEN_SECRET = 'OAUTH_TOKEN_SECRET'
+  end
 end

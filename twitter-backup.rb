@@ -5,6 +5,7 @@ require File.dirname(File.expand_path(__FILE__)) + '/tweets_store.rb'
 require File.dirname(File.expand_path(__FILE__)) + '/twitter_downloader.rb'
 require 'optparse'
 
+# Parse command line arguments
 options = {}
 option_parser = OptionParser.new do |opts|
   opts.banner = "Usage: #{opts.program_name} <username>"
@@ -17,10 +18,18 @@ if ARGV.empty?
 end
 
 twitter_username = ARGV[0]
+
+# Setup
 path_to_json_file = File.dirname(File.expand_path(__FILE__)) + "/data/#{twitter_username}.json"
 tweetsStore = TweetsStore.new(path_to_json_file)
-downloader = TwitterDownloader.new(twitter_username)
+downloader = TwitterDownloader.new(
+  TwitterBackup::Config::CONSUMER_KEY, 
+  TwitterBackup::Config::CONSUMER_SECRET,
+  TwitterBackup::Config::OAUTH_TOKEN, 
+  TwitterBackup::Config::OAUTH_TOKEN_SECRET)
+downloader.username = twitter_username
 
+# See if there are old tweets to download (older than the oldest one we already have)
 earliest_tweet_id = tweetsStore.lowest_tweet_id
 if earliest_tweet_id.nil?
   puts "No tweets stored so far. Trying to download all your tweets."
@@ -50,7 +59,7 @@ puts "Past tweets downloaded: #{ past_tweets_downloaded }"
 
 most_recent_tweet_id = tweetsStore.highest_tweet_id
 if !most_recent_tweet_id.nil?
-  puts "Trying to download tweets newer than id: #{ most_recent_tweet_id }"
+  puts "Trying to download tweets newer than id: #{ most_recent_tweet_id }."
 
   recent_tweets_downloaded = 0
   begin

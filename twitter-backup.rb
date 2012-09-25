@@ -20,8 +20,8 @@ end
 twitter_username = ARGV[0]
 
 # Setup
-path_to_json_file = File.dirname(File.expand_path(__FILE__)) + "/data/#{twitter_username}.json"
-tweetsStore = TweetsStore.new(path_to_json_file)
+database_path = File.dirname(File.expand_path(__FILE__)) + "/data/#{twitter_username}.sqlite3"
+tweetsStore = TweetsStore.new(database_path)
 downloader = TwitterDownloader.new(
   TwitterBackup::Config::CONSUMER_KEY, 
   TwitterBackup::Config::CONSUMER_SECRET,
@@ -72,10 +72,9 @@ if !most_recent_tweet_id.nil?
       recent_tweets_downloaded = recent_tweets_downloaded + tweets_downloaded
       puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id'] } to #{ tweets.last['id'] }."
     end
-    tweetsStore.prepend_tweets(tweets)
+    tweetsStore.append_tweets(tweets)
   end while tweets_downloaded > 0
   puts "New tweets downloaded: #{ recent_tweets_downloaded }"
 end
 
-tweetsStore.save
 puts "Total tweets stored: #{ tweetsStore.count }"

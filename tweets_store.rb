@@ -36,6 +36,7 @@ class TweetsStore
       Integer :retweeted_status_id
       String :raw_json
       index :tweet_id
+      index :created_at
     end
   end
   
@@ -61,22 +62,18 @@ class TweetsStore
     end
   end
 
-  def append_tweets(new_tweets)
-    new_tweets.each do |tweet|
-      created_at = DateTime.parse(tweet['created_at'])
-      retweeted_status_id = tweet['retweeted_status'] ? tweet['retweeted_status']['id'] : nil
-      raw_json = JSON.pretty_generate(tweet)
-      
-      tweet_record = {
-        :tweet_id => tweet['id'], 
-        :created_at => created_at,
+  def append_tweets(tweets)
+    records = tweets.map do |tweet|
+      record = {
+        :tweet_id => tweet['id_str'].to_i,
+        :created_at => DateTime.parse(tweet['created_at']),
         :text => tweet['text'], 
-        :in_reply_to_status_id => tweet['in_reply_to_status_id'], 
-        :retweeted_status_id => retweeted_status_id,
-        :raw_json => raw_json
+        :in_reply_to_status_id => tweet['in_reply_to_status_id_str'] ? tweet['in_reply_to_status_id_str'].to_i : nil,
+        :retweeted_status_id => tweet['retweeted_status'] ? tweet['retweeted_status']['id_str'].to_i : nil,
+        :raw_json => JSON.pretty_generate(tweet)
       }
-      self.tweets.insert(tweet_record)
     end
+    self.tweets.multi_insert(records)
   end
   
   private

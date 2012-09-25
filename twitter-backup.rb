@@ -51,7 +51,7 @@ begin
     puts "Downloaded no more tweets."
   else
     past_tweets_downloaded = past_tweets_downloaded + tweets_downloaded
-    puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id'] } to #{ tweets.last['id'] }."
+    puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id_str'] } to #{ tweets.last['id_str'] }."
   end
   tweetsStore.append_tweets(tweets)
 end while tweets_downloaded > 0
@@ -70,7 +70,7 @@ if !most_recent_tweet_id.nil?
       puts "Downloaded no more tweets."
     else
       recent_tweets_downloaded = recent_tweets_downloaded + tweets_downloaded
-      puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id'] } to #{ tweets.last['id'] }."
+      puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id_str'] } to #{ tweets.last['id_str'] }."
     end
     tweetsStore.append_tweets(tweets)
   end while tweets_downloaded > 0

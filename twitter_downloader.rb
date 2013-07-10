@@ -51,7 +51,7 @@ class TwitterDownloader
     all_options[:screen_name] = self.username if !self.username.nil?
     
     querystring = all_options.map { |k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join("&")
-    response = self.access_token.request(:get, "http://api.twitter.com/1/statuses/user_timeline.json?#{querystring}")
+    response = self.access_token.request(:get, "http://api.twitter.com/1.1/statuses/user_timeline.json?#{querystring}")
     tweets = JSON.parse(response.body)
   end
 end

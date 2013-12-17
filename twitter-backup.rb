@@ -58,22 +58,27 @@ end while tweets_downloaded > 0
 puts "Past tweets downloaded: #{ past_tweets_downloaded }"
 
 most_recent_tweet_id = tweetsStore.highest_tweet_id
+last_downloaded_tweet_id = nil
 if !most_recent_tweet_id.nil?
   puts "Trying to download tweets newer than id: #{ most_recent_tweet_id }."
 
   recent_tweets_downloaded = 0
   begin
-    since_tweet_id = tweetsStore.highest_tweet_id
-    tweets = downloader.download_tweets_later_than(since_tweet_id)
-    tweets_downloaded = tweets.count
+    tweets = downloader.download_tweets_between(most_recent_tweet_id, last_downloaded_tweet_id)
+    continue_download = false
     if tweets.empty?
       puts "Downloaded no more tweets."
     else
+      continue_download = true
+      tweets_downloaded = tweets.count
       recent_tweets_downloaded = recent_tweets_downloaded + tweets_downloaded
       puts "Downloaded #{ tweets_downloaded } tweets from #{ tweets.first['id_str'] } to #{ tweets.last['id_str'] }."
+      
+      last_downloaded_tweet = tweets.last
+      last_downloaded_tweet_id = last_downloaded_tweet["id"]
     end
     tweetsStore.append_tweets(tweets)
-  end while tweets_downloaded > 0
+  end while continue_download
   puts "New tweets downloaded: #{ recent_tweets_downloaded }"
 end
 

@@ -29,8 +29,11 @@ class TwitterDownloader
     download_tweets(options)
   end
 
-  def download_tweets_later_than(tweet_id)
-    options = tweet_id ? { :since_id => tweet_id.to_i } : {}
+  def download_tweets_between(since_tweet_id, max_tweet_id)
+    options = since_tweet_id ? { :since_id => since_tweet_id.to_i } : {}
+    unless (max_tweet_id.nil?)
+      options["max_id"] = max_tweet_id - 1
+    end
     download_tweets(options)
   end
 

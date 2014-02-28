@@ -17,7 +17,7 @@ class TwitterDownloader
     consumer = OAuth::Consumer.new(
       self.consumer_key, 
       self.consumer_secret,
-      { :site => "http://api.twitter.com", :scheme => :header })
+      { :site => "https://api.twitter.com", :scheme => :header })
     # now create the access token object from passed values
     token_hash = { :oauth_token => self.oauth_token, :oauth_token_secret => self.oauth_token_secret }
     self.access_token = OAuth::AccessToken.from_hash(consumer, token_hash)
@@ -54,7 +54,7 @@ class TwitterDownloader
     all_options[:screen_name] = self.username if !self.username.nil?
     
     querystring = all_options.map { |k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join("&")
-    response = self.access_token.request(:get, "http://api.twitter.com/1.1/statuses/user_timeline.json?#{querystring}")
+    response = self.access_token.request(:get, "https://api.twitter.com/1.1/statuses/user_timeline.json?#{querystring}")
     tweets = JSON.parse(response.body)
   end
 end

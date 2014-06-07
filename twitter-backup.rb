@@ -20,7 +20,7 @@ end
 twitter_username = ARGV[0]
 
 # Setup
-database_path = File.dirname(File.expand_path(__FILE__)) + "/data/#{twitter_username}.sqlite3"
+database_path = File.dirname(File.expand_path(__FILE__)) + "/data/#{twitter_username}/#{twitter_username}.sqlite3"
 tweetsStore = TweetsStore.new(database_path)
 downloader = TwitterDownloader.new(
   TwitterBackup::Config::CONSUMER_KEY, 

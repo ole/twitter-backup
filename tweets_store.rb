@@ -3,6 +3,7 @@ require 'sequel'
 require 'sequel/extensions/pretty_table'
 require 'json'
 require 'fileutils'
+require 'open-uri'
 
 class TweetsStore
   attr_accessor :database_path
@@ -62,6 +63,15 @@ class TweetsStore
     end
   end
 
+  def download_image(image, dir, id)
+    ext =  File.extname(image.to_s)
+    filename = "#{dir}/#{id}#{ext}"
+
+    File.open(filename, "wb") do |f|
+      f.write(open(image).read)
+    end
+  end
+
   def append_tweets(tweets)
     records = tweets.map do |tweet|
       record = {
@@ -74,6 +84,16 @@ class TweetsStore
       }
     end
     self.tweets.multi_insert(records)
+
+    directory = "#{File.dirname(File.expand_path(database_path))}/media"
+    Dir.mkdir(directory) unless File.exists?(directory)
+
+    tweets.map do |image|
+      unless image["entities"]["media"][0]["media_url"] == nil
+        media_url = URI.encode(JSON.parse(JSON.pretty_generate(image).to_s)["entities"]["media"][0]["media_url"])
+        download_image(media_url, directory, image['id_str'])
+      end
+    end
   end
   
   private

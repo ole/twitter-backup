@@ -89,7 +89,7 @@ class TweetsStore
     Dir.mkdir(directory) unless File.exists?(directory)
 
     tweets.map do |image|
-      unless image["entities"]["media"][0]["media_url"] == nil
+      if image["entities"].key?("media")
         media_url = URI.encode(JSON.parse(JSON.pretty_generate(image).to_s)["entities"]["media"][0]["media_url"])
         download_image(media_url, directory, image['id_str'])
       end
